@@ -1,0 +1,57 @@
+MongoDB Get Started
+--------------------
+
+mongo
+
+> help
+
+// show databases
+> show dbs
+
+// show collections (documents)
+> show collections
+
+// Create a database called "coffeeshopdb"
+// Database will be created when you create the first collection
+> use coffeeshopdb
+switched to db coffeeshopdb
+
+// Create a collection (document)
+> db.createCollection("beverage")
+
+> show dbs
+
+> show collections
+
+// Insert one row
+> db.beverage.insert({ id: 1, name: 'Espresso', price: 5.5 })
+WriteResult({ "nInserted" : 1 })
+
+// Insert multiple rows as an array
+> db.beverage.insert([
+      { id: 2, name: 'Cappuccino', price: 5.6 },
+      { id: 3, name: 'Latte', price: 5.7 }
+    ])
+
+// Query (or Find)
+> db.beverage.find().pretty()
+
+// Find with filter
+> db.beverage.find({ id : 3 }).pretty()
+
+// Update with $set
+> db.beverage.update({ name: 'Latte' }, { $set: { name: 'Latte New' }})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.beverage.find({ id: 3 } ).pretty()
+
+// Update with $inc
+> db.beverage.update({ name: 'Latte New' }, { $inc: { price: -1.1 } })
+
+> db.beverage.find({ id: 3 }).pretty()
+
+// Update with $mul
+> db.beverage.update({ name: { $in: ['Espresso', 'Cappuccino'] } }, { $mul: { price: 1.2 }})
+
+> db.beverage.find({ id: { $in: [1, 2] } }).pretty()
+
+> exit

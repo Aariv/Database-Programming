@@ -1,0 +1,15 @@
+Getting Started with PostgreSQL
+-------------------------------
+
+I assume that you are familiar with SQL commands (such as CREATE TABLE, DROP TABLE, INSERT, SELECT, UPDATE and DELETE).
+
+1.  Introduction
+
+PostgreSQL is an open-source Object-Relational Database Management System (ORDBMS). 
+
+It supports a large part of the SQL standards such as foreign keys, triggers, views and transactions; and object-oriented features such as inheritance.
+
+The project started in UC Berkeley in 1986, and is now developed by a group of volunteers called "PostgreSQL Global Development Group".
+
+The mother site for PostgreSQL is http://www.postgresql.org; with manual @ http://www.postgresql.org/docs/manuals/.
+
