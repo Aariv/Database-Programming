@@ -1,0 +1,300 @@
+3.  How to Install MySQL 8.0 and Get Started with SQL Programming
+=================================================================
+
+3.1  Step 0: Create a directory to keep all your works
+-------------------------------------------------------
+IMPORTANT: Before getting started, check that you have a few GBs of Free Spaces.
+
+Create a directory to keep all your works called:
+(For macOS/Linux) "~/myWebProject" where "~" denotes your home directory.
+
+// For macOS: Use "~/myWebProject" (where "~" denotes your home directory)
+// Launch a "Terminal" and issue these commands:
+
+mkdir myWebProject
+
+3.2  Step 1: Download and Install MySQL
+-----------------------------------------
+For macOS
+
+Notes: The latest version of MySQL (8.0.23) works with macOS Catalina (10.15) and Big Slur (11). If you are running older version of macOS, you may need to find an archived version of MySQL @ https://dev.mysql.com/downloads/ ⇒ Archive.
+
+1. Download the MySQL Community Server "DMG Archive" from https://dev.mysql.com/downloads/mysql/:
+
+ a. Under "General Availability (GA) Releases" tab.
+ b. Under "MySQL Community Server 8.0.{xx}", where {xx} is the latest update number ⇒ In "Select Operating System", choose the "macOS".
+ c. Select the appropriate "macOS 10.15 (x86, 64-bit) DMG Archive" for macOS 10.15 or 11 (mysql-8.0.{xx}-macos10.15-x86_64.dmg).
+ d. There is NO need to "Login" or "Sign up" - Just click "No thanks, just start my download".
+
+2. To install MySQL (See https://dev.mysql.com/doc/refman/8.0/en/osx-installation-pkg.html for screen shots):
+ a. Go to "Downloads" ⇒ Double-click ".dmg" file downloaded.
+ b. Double-click the "mysql-8.0.{xx}-osx-10.{xx}-x86_64.pkg".
+ c. In "Introduction", click "Continue".
+ d. In "License", choose "Agree".
+ e. In "Installation Type", click "Install".
+ f. In "Configuration", choose "Use Strong Password Encryption", and enter a password for the "root" user. Make sure you remember your password.
+ g. MySQL will be installed in "/usr/local/mysql". Take note of this installed directory!!
+ f. Eject the ".dmg" file.
+
+3. If you make a mistake or forgot your password, stop the server (Click "Apple" Icon ⇒ System Preferences ⇒ MySQL ⇒ Stop).
+ Goto /usr/local (via Finder ⇒ Go ⇒ GoTo Folder ⇒ type /usr/local) and remove all the folders beginning with "mysql...", e.g., "mysql-8.0.{xx}..." and "mysql", and Re-run Step 2.
+
+3.3  Step 3: Start the "Server"
+--------------------------------
+The MySQL is a client-server system. The database is run as a server application. Users access the database server via a client program, locally or remotely thru the network, as illustrated:
+
+ 1. The server program is called "mysqld" (with a suffix 'd', which stands for daemon - a daemon is a non-interactive process running in the background).
+
+ 2. The client program is called "mysql" (without the 'd').
+
+ The programs mysqld and mysql are kept in the "bin" sub-directory of the MySQL installed directory.
+
+Startup Server
+
+For macOS
+ The EASY WAY: Via graphical control. Click "Apple" Icon ⇒ System Preferences ⇒ MySQL ⇒ Start or Stop.
+
+The MySQL database server is now started, and ready to handle clients' requests.
+
+Shutdown Server
+ For macOS
+  The EASY WAY: Via the graphical control. Click "Apple" Icon ⇒ System Preferences ⇒ MySQL ⇒ Stop.
+
+3.4  Step 4: Start a "Client"
+-------------------------------
+Recall that the MySQL is a client-server system. 
+Once the server is started, one or more clients can be connected to the database server. 
+A client could be run on the same machine (local client); or from another machine over the network (remote client).
+
+To login to the MySQL server, you need to provide a username and password. During the installation, MySQL creates a superuser called "root" with a temporary password. I hope that you have taken note of this password! (Otherwise, re-install!)
+
+The MySQL installation provides a command-line client program called "mysql". (Recall that the server program is called "mysqld" with a suffix 'd'; the client program does not have the suffix 'd').
+
+For macOS
+
+Open a NEW "Terminal" and issue these commands to start a MySQL client with superuser root:
+
+$mysql -u root -p
+
+3.5  Step 5: Change the Password for the Superuser "root"
+-----------------------------------------------------------
+
+As mentioned earlier, the MySQL installation creates a superuser called "root" with a temporary random password. "root" is a privileged user that can do anything, including deleting all the databases. You are required to change the root's password immediately after logging in.
+
+Changing the Password for "root"
+*******************************
+Let's continue with our client session started earlier.
+
+mysql> alter user 'root'@'localhost' identified by 'xxxx';
+mysql> select Host, User, authentication_string from mysql.user;
+mysql> quit
+
+Re-Start a Client as "root" with the New Password
+***************************************************
+-- Change directory to MySQL's binary directory
+cd /usr/local/mysql/bin
+-- Start a MySQL client
+./mysql -u root -p
+Enter password:  // Enter the NEW password
+Welcome to the MySQL monitor.
+......
+mysql>
+-- client started, ready to issue SQL command
+
+3.6  Step 6: Create a New User
+---------------------------------
+The superuser "root" is privileged, which is meant for database administration and is not meant for operational.
+
+We shall create a new user - let's call it "myuser" - with a lesser privilege. To create a new user, start a client with superuser "root":
+
+./mysql -u root -p   // macOS
+
+-- Create a new user called "myuser", which can login from localhost, with password "xxxx"
+mysql> create user 'myuser'@'localhost' identified by 'xxxx';
+
+-- Grant permission to myuser to perform tasks
+mysql> grant all on *.* to 'myuser'@'localhost';
+Query OK (0.01 sec)
+
+mysql> quit
+
+Explanation
+************
+CREATE USER 'myuser'@'localhost' IDENTIFIED BY 'xxxx'
+ We use the command "create user" to create a new user called 'myuser'@'localhost', who can login to the server locally from the same machine (but not remotely from another machine), with password "xxxx".
+
+GRANT ALL ON *.* TO 'myuser'@'localhost'
+ The newly created user has NO privilege to perform any database operation including select.
+ We use the "grant" command to grant "all" the privileges (including select, insert, delete, and so on) to this new user on ALL the databases and ALL the tables ("on *.*").
+ This new user, in practice, has the same privilege as root, except that it cannot issue grant command.
+
+ For production, you should grant only the necessary privileges on selected databases and selected tables, e.g., "grant select, insert, update on studentdb.*"
+
+ it can issue select, insert and update (but no delete, create/drop table) on ALL the tables of the database studentdb only.
+
+ 3.7  Step 7: Create a new Database, a new Table in the Database, Insert Records, Query and Update
+--------------------------------------------------------------------------------------------------
+
+Recall that the MySQL server organizes data in the following hierarchy:
+
+ 1. A system contains many databases.
+ 2. A database contains many tables.
+ 3. A table contains rows (records) and columns (fields).
+
+ Let's create a database called "studentdb", and a table called "class101" in the database. 
+ The table shall have three columns: id (of the type INT - integer), name (of the type VARCHAR(50) - variable-length string of up to 50 characters), gpa (of the type FLOAT - floating-point number).
+
+Tips on Client's Session (Come Back to this Section If You Get Stuck in Running Command)
+
+You need to terminate your command with a semicolon (;), which sends the command to the server for processing. E.g.,
+
+mysql> select * from class101;
+
+ -- Terminate a command with ';' to send the command to the server for processing
+
+A command can span several lines. The prompt for subsequent lines changes to -> to denote continuation. You need to terminate the command with a semicolon (;). E.g.,
+
+In other words, if you forget to type ';', you can type the ';' on the next line.
+
+You can use \c to cancel (abort) the current command. E.g.,
+
+If you open a single/double quote, without closing it, the continuation prompt changes to '> or "> (instead of ->). For example,
+
+You can also press Ctrl-C to abort the current command.
+
+You can use up/down arrow keys to retrieve the previous/next commands, from the "command history".
+
+You should enable Copy/Paste functions of CMD shell. To enable Copy/Paste, click the CMD's icon ⇒ Properties ⇒ Options ⇒ Edit Options ⇒ Check "Enable Ctrl key shortcuts". You can then use Ctrl-C/Ctrl-V for Copy/Paste.
+
+
+SQL Programming
+******************
+
+-- Start a client
+mysql -u myuser -p 
+
+mysql> create database if not exists studentdb;
+
+mysql> show databases;
+
+-- Use 'studentdb' database as the default (current) database
+-- You can refer to tables in the default database by the 'tablename' alone,
+--   instead of 'databasename.tablename' for non-default database.
+mysql> use studentdb;
+
+-- Remove the table 'class101' in the default database if it exists
+mysql> drop table if exists class101;
+
+-- Create a new table called 'class101' in the default database 'studentdb',
+--   with 3 columns of the specified types
+
+mysql> create table class101 (id int, name varchar(50), gpa float);
+
+-- List all the tables in the default database 'studentdb'
+mysql> show tables;
+
+-- Describe the 'class101' table (List its columns' definition)
+mysql> describe class101;
+
+-- Insert a row into 'class101' table.
+-- Strings are single-quoted. No quotes for INT and FLOAT values.
+mysql> insert into class101 values (11, 'Tan Ah Teck', 4.8);
+
+-- Insert another row
+mysql> insert into class101 values (22, 'Mohamed Ali', 4.9);
+
+-- Select all columns (*) from table 'class101', and all rows
+mysql> select * from class101;
+
+-- Select some columns from table 'class101', and rows that match the conditions
+mysql> select name, gpa from class101 where gpa > 4.85;
+
+-- Update the given field of the selected records
+mysql> update class101 set gpa = 4.4 where name = 'Tan Ah Teck';
+
+mysql> select * from class101;
+
+-- Delete selected records
+mysql> delete from class101 where id = 22;
+
+mysql> select * from class101;
+
+Exercises:
+
+1. Select records with names starting with letter 'K'. (Hints: name like 'K%', see Section "SQL by Examples")
+
+mysql> select * from class101 where name like = 'K%';
+
+2. Select records with names NOT starting with letter 'K'. (Hints: name NOT like ...)
+
+mysql> select * from class101 where name like != 'K%';
+
+3. Select records with gpa between 4.35 and 4.65. (Hints: test-1 AND test-2)
+
+mysql> select * from class101 where gpa between 4.35 and 4.65;
+
+4. Select records with names having a letter 'e'. (Hints: name like '%e%')
+
+mysql> select * from class101 where name like = '%e%';
+
+5. Select records with names having a letter 'e' or 'a'. (Hints: test-1 OR test-2)
+
+mysql> select * from class101 where name like = '%e%' or name like 'a';
+
+6. Select records with names having a letter 'e' and gpa ≥ 4.5.
+
+mysql> select * from class101 where name like = '%e%' and gpa >= 4.5;
+
+3.8  More Exercises
+----------------------
+1. Show all the databases.
+
+mysql> show databases;
+
+2. Create a new database called "ABCTrading".
+
+mysql> CREATE DATABASE ABCTrading;
+
+3. Set the "ABCTrading" database as the default database.
+
+mysql> use ABCTrading
+
+4. Show all the tables in the default database.
+
+mysql> show tables;
+
+5. Create a new table called "products" with the columns and type indicated below.
+
+// create table class101 (id int, name varchar(50), gpa float);
+CREATE TABLE products (
+	id int, 
+	category char(3),
+	name varchar(50),
+	quantity int,
+	price float
+);
+
+6. Show the table description.
+
+mysql> describe products;
+
+7. Insert the above records and list all the records.
+
+mysql> INSERT INTO products VALUES(1001, 'PEN', 'Pen Red', 5000, 1.23);
+mysql> INSERT INTO products VALUES(1002, 'PEN', 'Pen Blue', 8000, 1.25);
+mysql> INSERT INTO products VALUES(1003, 'PEN', 'Pen Black', 2000, 1.25);
+mysql> INSERT INTO products VALUES(1004, 'PEN', 'Pencil 2B', 10000, 0.49);
+mysql> INSERT INTO products VALUES(1005, 'PEN', 'Pencil 2H', 9000, 0.48);
+
+8. List records with name containing "Pencil".
+mysql> SELECT * FROM products WHERE name like = '%Pencil%';
+
+9. List records with price ≥ 1.0.
+mysql> SELECT * FROM products WHERE price >= 1.0;
+
+10. Increase the price of all items by 10%, and list all the records.
+
+11. Remove "Pen Red" from the table, and list all the records.
+mysql> DELETE FROM products WHERE name = 'Pen Red';
+
+

@@ -1,0 +1,29 @@
+2.  Introduction to MySQL Relational Database Management System (RDBMS)
+=======================================================================
+
+SQL is a programming language for interacting with relational databases. On the other hand, MySQL is a software - a Relational Database Management System.
+
+MySQL is one of the most used, industrial-strength, open-source and free Relational Database Management System (RDBMS).
+
+MySQL was developed by Michael "Monty" Widenius and David Axmark in 1995.  
+
+It was owned by a Swedish company called MySQL AB, which was bought over by Sun Microsystems in 2008. Sun Microsystems was acquired by Oracle in 2010.
+
+MySQL is successful, not only because it is free and open-source (there are many free and open-source databases, such as PostgreSQL, Apache Derby (Java DB), mSQL (mini SQL), SQLite and Apache OpenOffice's Base), but also for its speed, ease of use, reliability, performance, connectivity (full networking support), portability (run on most OSes, such as Unix, Windows, macOS), security (SSL support), small size, and rich features.
+
+MySQL supports all features expected in a high-performance relational database, such as transactions, foreign key, replication, subqueries, stored procedures, views and triggers.
+
+MySQL is often deployed in a LAMP (Linux-Apache-MySQL-PHP), WAMP (Windows-Apache-MySQL-PHP), or MAMP (macOS-Apache-MySQL-PHP) environment. All components in LAMP is free and open-source, inclusive of the Operating System.
+
+The mother site for MySQL is https://www.mysql.com. The ultimate reference for MySQL is the "MySQL Reference Manual", available at https://dev.mysql.com/doc. The reference manual is huge - the PDF has over 3700 pages!!!
+
+MySQL operates as a client-server system over TCP/IP network.
+
+The server runs on a machine with an IP address on a chosen TCP port number.
+
+The default TCP port number for MySQL is 3306. Users can access the server via a client program, connecting to the server at the given IP address and TCP port number.
+
+MariaDB
+=======
+Extracted from Wiki: 
+MariaDB is a community-developed, commercially supported fork of the MySQL relational database management system (RDBMS), intended to remain free and open-source software under the GNU General Public License.
