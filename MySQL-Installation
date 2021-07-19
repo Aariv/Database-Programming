@@ -297,4 +297,88 @@ mysql> SELECT * FROM products WHERE price >= 1.0;
 11. Remove "Pen Red" from the table, and list all the records.
 mysql> DELETE FROM products WHERE name = 'Pen Red';
 
+4.  Many-to-many Relationship
+------------------------------
+
+5.  (Optional) Backup and Restore Databases
+-------------------------------------------
+5.1  Backup via "mysqldump" Utility Program
+****************************************************
+You can use the "mysqldump" utility program to back up (i) the entire server (all databases), (ii) selected databases, or (ii) selected tables of a database.
+
+The "mysqldump" program generates a SQL script that can later be executed to re-create the databases, tables and their rows.
+
+For example, the following command backups the entire "studentdb" database to a SQL script called "backup_studentdb.sql".
+
+mysqldump -u myuser -p --databases studentdb > ~/myWebProject/backup_studentdb.sql
+ // ~ denotes the home directory of the current login user
+
+Study the output file, which contains CREATE DATABASE, CREATE TABLE and INSERT statements to re-create the database and tables dumped earlier.
+
+5.2  Restore via "source" command in a mysql client
+****************************************************
+You can restore from the backup by running the "source" command in a MySQL client. For example, to restore the studentdb backup earlier:
+-- Start a MySQL client
+$mysql -u myuser -p
+
+-- Run the backup script to recreate the database
+mysql> drop database if exists studentdb;
+mysql> source backup_studentdb.sql
+
+6.  Summary of Frequently-Used Commands
+-------------------------------------------
+(For macOS) Starting MySQL Server and Client
+$mysql -u username -p
+
+Frequently-used MySQL Commands
+*******************************
+MySQL commands are NOT case sensitive.
+
+-- General
+;           -- Sends command to server for processing (or \g)
+\c          -- Cancels (aborts) the current command
+
+-- Database-level
+DROP DATABASE databaseName;                 -- Deletes the database
+DROP DATABASE IF EXISTS databaseName;       -- Deletes only if it exists
+CREATE DATABASE databaseName;               -- Creates a new database
+CREATE DATABASE IF NOT EXISTS databaseName; -- Creates only if it does not exists
+SHOW DATABASES;                             -- Shows all databases in this server
+
+
+-- Set default database.
+-- Otherwise you need to use the fully-qualified name, in the form 
+--   of "databaseName.tableName", to refer to a table.
+USE databaseName
+
+-- Table-level
+DROP TABLE tableName;
+DROP TABLE IF EXISTS tableName;
+CREATE TABLE tableName (column1Definition, column2Definition, ...);
+CREATE TABLE IF NOT EXISTS tableName (column1Definition, column2Definition, ...);
+SHOW TABLES;              -- Shows all the tables in the default database
+DESCRIBE tableName;       -- Describes the columns for the table
+DESC tableName;           -- Same as above
+
+
+-- Record-level (CURD - create, update, read, delete)
+INSERT INTO tableName VALUES (column1Value, column2Value,...);
+INSERT INTO tableName (column1Name, ..., columnNName) 
+   VALUES (column1Value, ..., columnNValue);
+DELETE FROM tableName WHERE criteria;
+UPDATE tableName SET columnName = expression WHERE criteria;
+SELECT column1Name, column2Name, ... FROM tableName 
+   WHERE criteria
+   ORDER BY columnAName ASC|DESC, columnBName ASC|DESC, ...;
+
+
+-- Running a script of MySQL statements
+SOURCE full-Path-Filename
+
+
+7.  (Skip Unless...) How to Debug?
+
+
+
+
 
