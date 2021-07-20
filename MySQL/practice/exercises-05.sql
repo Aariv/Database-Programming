@@ -141,8 +141,209 @@ select now(), curdate(), curtime();
 -- SQL Date/Time Types
 -- MySQL provides these date/time data types:
 /*
- DATETIME: stores both date and time in the format of 'YYYY-MM-DD HH:MM:SS'. The valid range is '1000-01-01 00:00:00' to '9999-12-31 23:59:59'. You can set a value using the valid format (e.g., '2011-08-15 00:00:00'). You could also apply functions NOW() or CURDATE() (time will be set to '00:00:00'), but not CURTIME().
- DATE: stores date only in the format of 'YYYY-MM-DD'. The range is '1000-01-01' to '9999-12-31'. You could apply CURDATE() or NOW() (the time discarded) on this field.
+ DATETIME: stores both date and time in the format of 'YYYY-MM-DD HH:MM:SS'. 
+ The valid range is '1000-01-01 00:00:00' to '9999-12-31 23:59:59'. 
+ You can set a value using the valid format (e.g., '2011-08-15 00:00:00'). 
+ You could also apply functions NOW() or CURDATE() (time will be set to '00:00:00'), 
+ but not CURTIME().
+ 
+ DATE: stores date only in the format of 'YYYY-MM-DD'. The range is '1000-01-01' to '9999-12-31'. 
+ You could apply CURDATE() or NOW() (the time discarded) on this field.
+
+ TIME: stores time only in the format of 'HH:MM:SS'. 
+ You could apply CURTIME() or NOW() (the date discarded) for this field.
+
+ YEAR(4|2): in 'YYYY' or 'YY'. The range of years is 1901 to 2155. 
+ Use DATE type for year outside this range. 
+ You could apply CURDATE() to this field (month and day discarded).
+
+ TIMESTAMP: similar to DATETIME but stored the number of seconds since January 1, 1970 UTC (Unix-style). 
+ The range is '1970-01-01 00:00:00' to '2037-12-31 23:59:59'.
+
+ The differences between DATETIME and TIMESTAMP are:
+  the range,
+  support for time zone,
+  TIMESTAMP column could be declared with DEFAULT CURRENT_TIMESTAMP to set the default value to the current date/time.
+  You can also declare a TIMESTAMP column with "ON UPDATE CURRENT_TIMESTAMP" to capture the timestamp of the last update.
+
+*/
+
+/*
+
+More Date/Time Functions
+------------------------
+There are many date/time functions:
+
+ Extracting part of a date/time: YEAR(), MONTH(), DAY(), HOUR(), MINUTE(), SECOND(), 
+ e.g.,
+
+*/
+
+SELECT YEAR(NOW()), MONTH(NOW()), DAY(NOW()), HOUR(NOW()), MINUTE(NOW()), SECOND(NOW());
+
+/*
+ Extracting information: 
+  DAYNAME() (e.g., 'Monday'), MONTHNAME() (e.g., 'March'), DAYOFWEEK() (1=Sunday, …, 7=Saturday), DAYOFYEAR() (1-366), ...
+*/
+
+SELECT DAYNAME(NOW()), MONTHNAME(NOW()), DAYOFWEEK(NOW()), DAYOFYEAR(NOW());
+
+/*
+ Computing another date/time:
+  DATE_SUB(date, INTERVAL expr unit), 
+  DATE_ADD(date, INTERVAL expr unit), 
+  TIMESTAMPADD(unit, interval, timestamp), 
+
+  e.g.,
+*/
+
+SELECT DATE_ADD('2012-01-31', INTERVAL 5 DAY);
+SELECT DATE_SUB('2012-01-31', INTERVAL 2 MONTH);
+
+/*
+
+Computing interval: 
+  DATEDIFF(end_date, start_date), 
+  TIMEDIFF(end_time, start_time), 
+  TIMESTAMPDIFF(unit, start_timestamp, end_timestamp), 
+
+  e.g.,
+*/
+
+SELECT DATEDIFF('2012-02-01', '2012-01-28');
+SELECT TIMESTAMPDIFF(DAY, '2012-02-01', '2012-01-28');
+
+/*
+Representation: 
+
+ TO_DAYS(date) (days since year 0), FROM_DAYS(day_number), e.g.,
+
+*/
+SELECT TO_DAYS('2012-01-31');
+SELECT FROM_DAYS(734899);
+
+/*
+Formatting: DATE_FORMAT(date, formatSpecifier), e.g.,
+*/
+
+SELECT DATE_FORMAT('2012-01-01', '%W %D %M %Y');
+SELECT DATE_FORMAT('2011-12-31 23:59:30', '%W %D %M %Y %r');
+
+/*
+
+Exercises:
+
+*/
+
+-- 5.3  View
+-- *********
+
+/*
+  A view is a virtual table that contains no physical data. '
+  It provide an alternative way to look at the data.
+*/
+-- Define a VIEW called supplier_view from products, suppliers and products_suppliers tables
+
+CREATE VIEW supplier_view
+  AS
+  SELECT suppliers.name as `Supplier Name`, products.name as `Product Name`
+       FROM products 
+          JOIN suppliers ON products.productID = products_suppliers.productID
+          JOIN products_suppliers ON suppliers.supplierID = products_suppliers.supplierID;
+-- You can treat the VIEW defined like a normal table
+SELECT * FROM supplier_view;
+SELECT * FROM supplier_view WHERE `Supplier Name` LIKE 'ABC%';
+
+DROP VIEW IF EXISTS patient_view;
+
+CREATE VIEW patient_view
+       AS
+       SELECT 
+          patientID AS ID, 
+          name AS Name, 
+          dateOfBirth AS DOB,
+          TIMESTAMPDIFF(YEAR, dateOfBirth, NOW()) AS Age
+       FROM patients
+       ORDER BY Age, DOB;
+
+SELECT * FROM patient_view WHERE Name LIKE 'A%';
+SELECT * FROM patient_view WHERE age >= 18;
+
+-- 5.4  Transactions
+-- *****************
+
+/*
+
+A atomic transaction is a set of SQL statements that either ALL succeed or ALL fail.
+Transaction is important to ensure that there is no partial update to the database,
+given an atomic of SQL statements. Transactions are carried out via COMMIT and ROLLBACK.
+*/
+
+CREATE TABLE accounts (
+          name     VARCHAR(30),
+          balance  DECIMAL(10,2)
+       );
+
+INSERT INTO accounts VALUES ('Paul', 1000), ('Peter', 2000);
+SELECT * FROM accounts;
+
+-- Transfer money from one account to another account
+START TRANSACTION;
+UPDATE accounts SET balance = balance - 100 WHERE name = 'Paul';
+UPDATE accounts SET balance = balance + 100 WHERE name = 'Peter';
+COMMIT;     -- Commit the transaction and end transaction
+SELECT * FROM accounts;
+
+START TRANSACTION;
+UPDATE accounts SET balance = balance - 100 WHERE name = 'Paul';
+UPDATE accounts SET balance = balance + 100 WHERE name = 'Peter';
+ROLLBACK;    -- Discard all changes of this transaction and end Transaction
+SELECT * FROM accounts;
+
+/*
+If you start another mysql client and do a SELECT during the transaction (before the commit or rollback), you will not see the changes.
+Alternatively, you can also disable the so-called autocommit mode, which is set by default and commit every single SQL statement.
+
+*/
+-- Disable autocommit by setting it to false (0)
+SET autocommit = 0;
+UPDATE accounts SET balance = balance - 100 WHERE name = 'Paul';
+UPDATE accounts SET balance = balance + 100 WHERE name = 'Peter';
+COMMIT;
+SELECT * FROM accounts;
+UPDATE accounts SET balance = balance - 100 WHERE name = 'Paul';
+UPDATE accounts SET balance = balance + 100 WHERE name = 'Peter';
+ROLLBACK;
+SELECT * FROM accounts;
+SET autocommit = 1;   -- Enable autocommit
+
+/*
+A transaction groups a set of operations into a unit that meets the ACID test:
+ 1. Atomicity: If all the operations succeed, changes are committed to the database. 
+ If any of the operations fails, the entire transaction is rolled back, 
+ and no change is made to the database. In other words, there is no partial update.
+ 2. Consistency: A transaction transform the database from one consistent state to another consistent state.
+ 3. Isolation: Changes to a transaction are not visible to another transaction until they are committed.
+ 4. Durability: Committed changes are durable and never lost.
+*/
+
+-- 5.5  User Variables
+-- *******************
+/*
+In MySQL, you can define user variables via:
+
+1. @varname :=value in a SELECT command, or
+2. SET @varname := value or SET @varname = value command.
+
+For examples,
+
+*/
+SELECT @ali_dob := dateOfBirth FROM patients WHERE name = 'Ali';
+SELECT name WHERE dateOfBirth < @ali_dob;
+SET @today := CURDATE();
+SELECT name FROM patients WHERE nextVisitDate = @today;
+
+
 
 
 
